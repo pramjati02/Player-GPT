@@ -4,14 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FIFA Scout AI</title>
+
+  <!-- Google Fonts: Bebas Neue for headings, DM Sans for body text -->
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 <body>
+
+<!-- Root app container -->
 <div class="app">
 
+  <!-- Top header bar: logo, title, live status indicator -->
   <header>
     <div class="badge">
+      <!-- Football icon SVG -->
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm-1-5.5 4-2.5-4-2.5zm0 0"/>
         <circle cx="12" cy="12" r="3"/>
@@ -21,19 +29,23 @@
       <h1>FIFA Scout AI</h1>
       <p>Powered by RAG · FC 25 Player Database</p>
     </div>
+    <!-- Animated green dot showing the service is live -->
     <div class="status-dot">
       <div class="dot"></div>
       <span>Live</span>
     </div>
   </header>
 
+  <!-- Scrollable message history — new messages are appended here via JS -->
   <div class="messages" id="messages">
+    <!-- Initial bot greeting message -->
     <div class="message bot">
       <div class="label">Scout AI</div>
       <div class="bubble">Welcome. Ask me anything about FC 25 players — stats, positions, comparisons, or recommendations. Try asking for a fast winger, a defensive midfielder, or the best passers in the Premier League.</div>
     </div>
   </div>
 
+  <!-- Suggestion chips shown before the user sends their first message -->
   <div class="suggestions" id="suggestions">
     <button class="suggestion" onclick="fillSuggestion(this)">Best CB under 25</button>
     <button class="suggestion" onclick="fillSuggestion(this)">Fast left winger in La Liga</button>
@@ -41,13 +53,16 @@
     <button class="suggestion" onclick="fillSuggestion(this)">Clinical striker with 85+ finishing</button>
   </div>
 
+  <!-- Cold start warning shown on first message while Render wakes up -->
   <div class="cold-warning" id="coldWarning">
     ⏳ First response may take 30–60 seconds due to server cold start. Hang tight...
   </div>
 
+  <!-- Input area: textarea + send button -->
   <div class="input-area">
     <div class="input-row">
       <textarea id="input" placeholder="Ask about a player, position, or stat..." rows="1"></textarea>
+      <!-- Send button with arrow icon -->
       <button id="send" onclick="sendMessage()">
         <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
@@ -56,6 +71,8 @@
   </div>
 
 </div>
+
+<!-- Main chat logic -->
 <script src="/static/script.js"></script>
 </body>
 </html>

@@ -1,17 +1,20 @@
+/* Reset: remove default browser margins, padding, and use border-box sizing */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Design tokens ───────────────────────────────────────────────────────── */
 :root {
-  --green: #00ff87;
-  --green-dim: #00c968;
-  --dark: #0a0a0a;
-  --panel: #111111;
-  --border: #1e1e1e;
-  --text: #e8e8e8;
-  --muted: #555;
-  --user-bg: #1a2e1a;
-  --bot-bg: #141414;
+  --green: #00ff87;       /* Primary accent colour */
+  --green-dim: #00c968;   /* Darker green for hover states */
+  --dark: #0a0a0a;        /* Page background */
+  --panel: #111111;       /* Input area background */
+  --border: #1e1e1e;      /* Subtle border colour */
+  --text: #e8e8e8;        /* Main body text */
+  --muted: #555;          /* Secondary/hint text */
+  --user-bg: #1a2e1a;     /* User message bubble background */
+  --bot-bg: #141414;      /* Bot message bubble background */
 }
 
+/* ── Base ────────────────────────────────────────────────────────────────── */
 html, body {
   height: 100%;
   background: var(--dark);
@@ -20,7 +23,7 @@ html, body {
   font-size: 15px;
 }
 
-/* Subtle pitch lines background */
+/* Decorative vertical pitch lines rendered as a fixed background overlay */
 body::before {
   content: '';
   position: fixed;
@@ -33,10 +36,12 @@ body::before {
       rgba(255,255,255,0.015) 59px,
       rgba(255,255,255,0.015) 60px
     );
-  pointer-events: none;
+  pointer-events: none; /* Clicks pass through to content beneath */
   z-index: 0;
 }
 
+/* ── App shell ───────────────────────────────────────────────────────────── */
+/* Full-height flex column, centred and capped at 780px wide */
 .app {
   position: relative;
   z-index: 1;
@@ -47,16 +52,17 @@ body::before {
   margin: 0 auto;
 }
 
-/* Header */
+/* ── Header ──────────────────────────────────────────────────────────────── */
 header {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  flex-shrink: 0; /* Prevent header from shrinking when messages overflow */
 }
 
+/* Circular green badge containing the football icon */
 .badge {
   width: 38px;
   height: 38px;
@@ -89,6 +95,7 @@ header {
   margin-top: 2px;
 }
 
+/* Live status indicator pushed to the far right of the header */
 .status-dot {
   margin-left: auto;
   display: flex;
@@ -98,6 +105,7 @@ header {
   color: var(--muted);
 }
 
+/* Pulsing green dot next to "Live" text */
 .dot {
   width: 7px;
   height: 7px;
@@ -111,7 +119,8 @@ header {
   50% { opacity: 0.3; }
 }
 
-/* Messages */
+/* ── Message list ────────────────────────────────────────────────────────── */
+/* Takes up remaining vertical space and scrolls when full */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -122,10 +131,12 @@ header {
   scroll-behavior: smooth;
 }
 
+/* Thin custom scrollbar */
 .messages::-webkit-scrollbar { width: 4px; }
 .messages::-webkit-scrollbar-track { background: transparent; }
 .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* Each message slides up and fades in when appended */
 .message {
   display: flex;
   flex-direction: column;
@@ -138,17 +149,20 @@ header {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* User messages align to the right, bot messages to the left */
 .message.user { align-self: flex-end; align-items: flex-end; }
 .message.bot  { align-self: flex-start; align-items: flex-start; }
 
+/* ── Message bubbles ─────────────────────────────────────────────────────── */
 .bubble {
   padding: 12px 16px;
   border-radius: 16px;
   line-height: 1.6;
   font-size: 14px;
-  white-space: pre-wrap;
+  white-space: pre-wrap; /* Preserve newlines in LLM responses */
 }
 
+/* User bubble: green tint, sharp bottom-right corner (iMessage style) */
 .message.user .bubble {
   background: var(--user-bg);
   border: 1px solid #2a4a2a;
@@ -156,6 +170,7 @@ header {
   color: #d4f5d4;
 }
 
+/* Bot bubble: dark background, sharp bottom-left corner */
 .message.bot .bubble {
   background: var(--bot-bg);
   border: 1px solid var(--border);
@@ -163,6 +178,7 @@ header {
   color: var(--text);
 }
 
+/* Small "YOU" / "SCOUT AI" label above each bubble */
 .label {
   font-size: 10px;
   letter-spacing: 1px;
@@ -171,7 +187,8 @@ header {
   text-transform: uppercase;
 }
 
-/* Typing indicator */
+/* ── Typing indicator ────────────────────────────────────────────────────── */
+/* Three bouncing dots shown while waiting for the API response */
 .typing .bubble {
   display: flex;
   align-items: center;
@@ -187,6 +204,7 @@ header {
   animation: bounce 1.2s ease-in-out infinite;
 }
 
+/* Stagger each dot's animation for a wave effect */
 .typing .bubble span:nth-child(2) { animation-delay: 0.2s; }
 .typing .bubble span:nth-child(3) { animation-delay: 0.4s; }
 
@@ -195,7 +213,8 @@ header {
   30% { transform: translateY(-6px); opacity: 1; }
 }
 
-/* Suggestions */
+/* ── Suggestion chips ────────────────────────────────────────────────────── */
+/* Quick-prompt buttons shown before the user's first message */
 .suggestions {
   padding: 0 24px 12px;
   display: flex;
@@ -217,17 +236,19 @@ header {
   white-space: nowrap;
 }
 
+/* Highlight chip in green on hover */
 .suggestion:hover {
   border-color: var(--green);
   color: var(--green);
 }
 
-/* Input area */
+/* ── Input area ──────────────────────────────────────────────────────────── */
 .input-area {
   padding: 12px 24px 24px;
   flex-shrink: 0;
 }
 
+/* Rounded container holding the textarea and send button */
 .input-row {
   display: flex;
   gap: 10px;
@@ -238,10 +259,12 @@ header {
   transition: border-color 0.2s;
 }
 
+/* Green border when the textarea is focused */
 .input-row:focus-within {
   border-color: var(--green);
 }
 
+/* Textarea grows up to 120px tall as the user types */
 textarea {
   flex: 1;
   background: transparent;
@@ -259,6 +282,7 @@ textarea {
 
 textarea::placeholder { color: var(--muted); }
 
+/* Green send button, sits at the bottom of the input row */
 button#send {
   width: 38px;
   height: 38px;
@@ -276,11 +300,12 @@ button#send {
 }
 
 button#send:hover { background: var(--green-dim); }
-button#send:active { transform: scale(0.94); }
+button#send:active { transform: scale(0.94); }  /* Slight press effect on click */
 button#send:disabled { background: var(--border); cursor: not-allowed; }
 
 button#send svg { width: 16px; height: 16px; fill: var(--dark); }
 
+/* Keyboard shortcut hint below the input row */
 .hint {
   font-size: 11px;
   color: var(--muted);
@@ -288,7 +313,8 @@ button#send svg { width: 16px; height: 16px; fill: var(--dark); }
   margin-top: 10px;
 }
 
-/* Cold start warning */
+/* ── Cold start warning ──────────────────────────────────────────────────── */
+/* Hidden by default; shown on the first message to warn about Render spin-up delay */
 .cold-warning {
   background: #1a1500;
   border: 1px solid #3a2e00;
@@ -300,4 +326,5 @@ button#send svg { width: 16px; height: 16px; fill: var(--dark); }
   display: none;
 }
 
+/* JS adds this class to make the warning visible */
 .cold-warning.visible { display: block; }
