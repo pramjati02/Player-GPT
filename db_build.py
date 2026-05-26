@@ -2,7 +2,6 @@ import pandas as pd
 from langchain_community.document_loaders import DataFrameLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
-from sklearn.preprocessing import MinMaxScaler
 
 # Load data
 df = pd.read_csv("all_players.csv")
@@ -21,15 +20,33 @@ numeric_cols = [
 # Replace missing numeric values with 0
 df[numeric_cols] = df[numeric_cols].fillna(0)
 
-# Normalize numeric values (0–1 range) (commented out for now to see if answers improve)
-#scaler = MinMaxScaler()
-#df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
+# Maps FIFA position codes to human-readable labels so semantic search
+# correctly matches queries like "striker" or "goalkeeper"
+position_labels = {
+    "ST": "striker",
+    "CF": "striker / centre forward",
+    "GK": "goalkeeper",
+    "CB": "centre-back",
+    "LW": "left winger",
+    "RW": "right winger",
+    "LM": "left midfielder",
+    "RM": "right midfielder",
+    "CAM": "attacking midfielder",
+    "CDM": "defensive midfielder",
+    "CM": "central midfielder",
+    "LB": "left back",
+    "RB": "right back",
+    "LWB": "left wing-back",
+    "RWB": "right wing-back",
+}
 
-# Combine text
 def make_player_text(row):
+    # Look up the human-readable label; fall back to the raw code if not found
+    position_label = position_labels.get(row['Position'], row['Position'])
+
     desc = (
         f"{row['Name']} ({row['Age']} years old, {row['Nation']}) plays for {row['Team']} "
-        f"in the {row['League']}. Primary position: {row['Position']}. "
+        f"in the {row['League']}. Primary position: {row['Position']} ({position_label}). "
         f"Alternative positions: {row['Alternative positions']}. "
         f"Overall rating: {int(row['OVR'])}. "
         f"Play style: {row['play style']}. "
@@ -62,11 +79,13 @@ def make_player_text(row):
         f"Aggression {int(row['Aggression'])}.\n"
     )
 
-    desc += (
-        f"Goalkeeping Attributes: Diving {int(row['GK Diving'])}, "
-        f"Handling {int(row['GK Handling'])}, Kicking {int(row['GK Kicking'])}, "
-        f"Positioning {int(row['GK Positioning'])}, Reflexes {int(row['GK Reflexes'])}.\n"
-    )
+    # Only add GK attributes for actual goalkeepers or players with nonzero GK stats
+    if row['Position'] == "GK" or any(row[[f"GK {stat}" for stat in ["Diving", "Handling", "Kicking", "Positioning", "Reflexes"]]] > 0):
+        desc += (
+            f"Goalkeeping Attributes: Diving {int(row['GK Diving'])}, "
+            f"Handling {int(row['GK Handling'])}, Kicking {int(row['GK Kicking'])}, "
+            f"Positioning {int(row['GK Positioning'])}, Reflexes {int(row['GK Reflexes'])}.\n"
+        )
 
     desc += f"Other Details: Weak Foot {row['Weak foot']}-star, Skill Moves {row['Skill moves']}-star."
 
