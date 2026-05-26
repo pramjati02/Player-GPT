@@ -1,6 +1,6 @@
 langchain 
 langchain-community 
-langchain-ollama 
+langchain-groq
 pandas 
 chromadb 
 sentence-transformers

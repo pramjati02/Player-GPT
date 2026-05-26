@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,8 +8,14 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
  
 app = FastAPI()
+
+load_dotenv()
+
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
  
 class Query(BaseModel):
     input: str
@@ -18,7 +26,7 @@ vectorstore = Chroma(persist_directory="chroma_fifa_db", embedding_function=embe
 retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
  
 print("Loading LLM...")
-llm = OllamaLLM(model="phi3:mini")
+llm = ChatGroq(model="llama-3.1-8b-instant")
  
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
