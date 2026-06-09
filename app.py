@@ -9,11 +9,11 @@ from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
 from langchain_groq import ChatGroq
+import chromadb
 from dotenv import load_dotenv
+load_dotenv()
  
 app = FastAPI()
-
-load_dotenv()
 
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
  
@@ -22,7 +22,14 @@ class Query(BaseModel):
  
 print("Loading vector store...")
 embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma(persist_directory="chroma_fifa_db", embedding_function=embedding)
+
+client = chromadb.CloudClient(
+    api_key=os.environ["CHROMA_API_KEY"],
+    tenant=os.environ["CHROMA_TENANT_ID"],
+    database=os.environ["CHROMA_DATABASE"]
+)
+
+vectorstore = Chroma(client=client, collection_name="fifa_players", embedding_function=embedding)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
  
 print("Loading LLM...")

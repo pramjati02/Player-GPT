@@ -1,7 +1,13 @@
+import os
+
 import pandas as pd
 from langchain_community.document_loaders import DataFrameLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
+import chromadb
+import time
+from dotenv import load_dotenv
+load_dotenv()
 
 # Load data
 df = pd.read_csv("all_players.csv")
@@ -99,8 +105,36 @@ print("Loading documents...")
 loader = DataFrameLoader(df, page_content_column="text")
 docs = loader.load()
 
+# Strip all metadata — all player info is in the text content already
+for doc in docs:
+    doc.metadata = {}
+
 print(f"Embedding {len(docs)} documents — this may take a few minutes...")
 embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma.from_documents(docs, embedding, persist_directory="chroma_fifa_db")
 
-print("Done! Chroma DB saved to ./chroma_fifa_db")
+client = chromadb.CloudClient(
+    api_key=os.environ["CHROMA_API_KEY"],
+    tenant=os.environ["CHROMA_TENANT_ID"],
+    database=os.environ["CHROMA_DATABASE"]
+)
+
+# Upload data to Chroma cloud in batches to avoid rate limits (300 docs per minute)
+BATCH_SIZE = 250  # safely under the 300 limit
+
+# Create the vectorstore with the first batch
+print(f"Uploading batch 1...")
+vectorstore = Chroma.from_documents(
+    docs[:BATCH_SIZE],
+    embedding,
+    client=client,
+    collection_name="fifa_players"
+)
+
+# Add remaining batches
+for i in range(BATCH_SIZE, len(docs), BATCH_SIZE):
+    batch = docs[i:i + BATCH_SIZE]
+    print(f"Uploading batch {i // BATCH_SIZE + 1}...")
+    vectorstore.add_documents(batch)
+    time.sleep(1)  # small delay to avoid rate limiting
+
+print(f"Done! {len(docs)} players uploaded to Chroma Cloud.")
