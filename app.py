@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
-from langchain_ollama import OllamaLLM
 from langchain.chains import RetrievalQA
 from langchain_groq import ChatGroq
 import chromadb
