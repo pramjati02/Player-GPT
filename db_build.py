@@ -105,7 +105,7 @@ print("Loading documents...")
 loader = DataFrameLoader(df, page_content_column="text")
 docs = loader.load()
 
-# Strip all metadata — all player info is in the text content already
+# Strip all metadata — not useful as LLM uses text content for answering questions
 for doc in docs:
     doc.metadata = {}
 
