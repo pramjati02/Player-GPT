@@ -3,6 +3,7 @@ langchain-community
 langchain-groq
 pandas
 chromadb
+sentence-transformers # Needed to build the db locally
 numpy
 scikit-learn
 fastapi
